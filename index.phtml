@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+	<meta charset="utf-8">
+	<title>Minichat</title>
+</head>
+<body>
+	<a href="index.php">Rafraichir</a>
+	<form method="post" action="minichat_post.php">
+		<table>
+			<thead>
+				<tr>
+					<th>
+						<label for="pseudo">Pseudo : </label><br>
+						<input type="text" name="pseudo" id="pseudo" value="<?= $pseudo ?>">
+					</th>
+					<th>
+						<label for="message">Message : </label><br>
+						<input type="text" name="message" id="message">
+					</th>
+				</tr>
+				<tr>
+					<th colspan="2">
+						<button>Envoyer</button>
+					</th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php if (!empty($messages)): ?>
+					<?php foreach ($messages as $message): ?>
+						<tr>
+							<td>
+								<?= htmlspecialchars($message['pseudo']) ?><br>
+								<small><i>il y a <?= age($message['creationDatetime']) ?></i></small>	
+							</td>
+							<td><?= htmlspecialchars($message['content']) ?></td>
+						</tr>
+					<?php endforeach ?>
+				<?php elseif ($page == 1) : ?>
+					<tr>
+						<td colspan="2">
+							Il n'y a aucun message dans la base de données.
+						</td>
+					</tr>
+				<?php else : ?>
+					<tr>
+						<td colspan="2">
+							Il n' y a pas de message correspondant à votre demande.
+						</td>
+					</tr>
+				<?php endif ?>
+			</tbody>
+		</table>
+	</form>
+	<div class="pagination">
+			<?php if (!empty($messages)): ?>
+
+				<!--  Si il y a des messages, on vut afficher les trois premières pages, les trois dernières pages, deux pages avant la page courant et dux pages après. Si il y a des 'trous' entre deux pages, on affiche '...' -->
+				<!-- Pour éviter les doublons, on parcoure toutes les possibilités d'index puis on les affiche suivant les cas -->
+				<?php for ($i=1; $i <= $pagesTotal; $i++) : ?>
+					<?php if($i < $page): ?>
+
+						<?php if (($i<=3) OR ($i>=$page-2)) : ?>
+							<a href="index.php?page=<?= $i ?>"><?= $i ?></a>
+						<?php elseif ($i == 4) : ?>
+							<!-- On arrive ici suelement si la page 4 est avant la page courante ET qu'on ne l'affiche pas - ie, il y a de la place entre les premières page liées et les pages autour de la page courante -->
+							<span>...</span>
+						<?php endif ?>
+
+					<?php elseif($i == $page): ?>
+						<!-- On arrive à la page, on affiche e numéro de la page courante sans lien.-->
+						<span><?= $page ?></span>
+
+					<?php else: ?>
+
+						<?php if (($i<=$page+2) OR ($i>=$pagesTotal-2)) : ?>
+							<a href="index.php?page=<?= $i ?>"><?= $i ?></a>
+						<!-- Même chose que pour $i==4 avec $i==$pagesTotal-3 -->
+						<?php elseif ($i == $pagesTotal-3) : ?>
+							<span>...</span>
+						<?php endif ?>
+					<?php endif ?>
+				<?php endfor ?>
+
+			<!-- Si la page où on est n'a pas de messages, on affiche les liens vers la première et dernière page -->
+			<!-- Si il n'a pas de mssages sur la preière page, on affiche rien -->
+			<?php elseif ($page != 1): ?>
+				<a href="index.php">1</a>
+				<?php if ($pagesTotal>=1): ?>
+					<?php if ($pagesTotal>2): ?>
+						<span>...</span>
+					<?php endif ?>
+					<a href="index.php?page=<?= $pagesTotal ?>"><?= $pagesTotal ?></a>
+				<?php endif ?>
+			<?php endif ?>
+		</div>
+	<?php if (isset($dev) AND $dev): ?>
+		<p><a href="dev/insert.php">ajouter 30 messages</a></p>
+		<p><a href="dev/empty.php">supprimer tous les messages</a></p>
+	<?php endif ?>
+</body>
+</html>
